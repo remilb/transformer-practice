@@ -10,6 +10,18 @@ type Except e = ExceptT e Identity
 
 newtype ExceptT e m a = ExceptT { runExceptT :: m (Either e a) }
 
+except :: Monad m => Either e a -> ExceptT e m a 
+except e = ExceptT $ return e
+
+mapExceptT :: (m (Either e a) -> n (Either e' b)) -> ExceptT e m a -> ExceptT e' n b 
+mapExceptT f = ExceptT . f . runExceptT
+
+withExceptT :: Functor m => (e -> e') -> ExceptT e m a -> ExceptT e' m a
+withExceptT f = ExceptT . fmap f' . runExceptT
+    where
+        f' (Left e) = Left $ f e
+        f' (Right a) = Right a
+
 instance Functor m => Functor (ExceptT e m) where
     fmap f (ExceptT ma) = ExceptT (fmap (fmap f) ma)
 
@@ -38,6 +50,8 @@ instance Monad m => Monad (ExceptT e m) where
 
 instance Trans (ExceptT e) where
     lift m = ExceptT $ fmap Right m
+
+-- * Exception ops
 
 throwError :: Monad m => e -> ExceptT e m a
 throwError = ExceptT . return . Left 
