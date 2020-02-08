@@ -11,8 +11,14 @@ type Writer w = WriterT w Identity
 
 newtype WriterT w m a = WriterT {runWriterT :: m (w, a)}
 
+writer :: Monad m => (w, a) -> WriterT w m a 
+writer wa = WriterT $ return wa
+
 execWriterT :: Monad m => WriterT w m a -> m w 
 execWriterT w = fmap fst $ runWriterT w
+
+mapWriterT :: (m (w, a) -> n (w', b)) -> WriterT w m a -> WriterT w' n b 
+mapWriterT f = WriterT . f . runWriterT
 
 instance Functor m => Functor (WriterT w m) where
     fmap f wa = WriterT $ fmap (fmap f) $ runWriterT wa
