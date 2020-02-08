@@ -40,5 +40,8 @@ instance Trans (ReaderT r) where
 ask :: Monad m => ReaderT r m r 
 ask = ReaderT (\r -> return r)
 
+local :: (r -> r) -> ReaderT r m a -> ReaderT r m a
+local f (ReaderT rf) = ReaderT $ rf . f
+
 asks :: Monad m => (r -> a) -> ReaderT r m a
 asks f = fmap f ask 
