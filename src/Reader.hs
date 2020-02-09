@@ -5,6 +5,7 @@ import           Trans
 import           Data.Functor
 import           Control.Applicative
 import           Control.Monad
+import           Control.Monad.IO.Class
 
 type Reader r = ReaderT r Identity
 
@@ -35,6 +36,8 @@ instance Monad m => Monad (ReaderT r m) where
 instance Trans (ReaderT r) where
     lift ma = ReaderT $ const ma
 
+instance MonadIO m => MonadIO (ReaderT r m) where
+    liftIO = lift . liftIO
 
 -- * Reader Ops
 ask :: Monad m => ReaderT r m r 

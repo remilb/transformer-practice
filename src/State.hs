@@ -5,6 +5,7 @@ import Trans
 import           Data.Functor
 import           Control.Applicative
 import           Control.Monad
+import           Control.Monad.IO.Class
 
 type State s = StateT s Identity
 
@@ -43,6 +44,9 @@ instance Monad m => Monad (StateT s m) where
 
 instance Trans (StateT s) where
     lift m = StateT (\s -> fmap (\a -> (a, s)) m)
+
+instance MonadIO m => MonadIO (StateT s m) where
+    liftIO = lift . liftIO
 
 -- * State Ops
 get :: Monad m => StateT s m s

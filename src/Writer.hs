@@ -6,6 +6,7 @@ import           Data.Functor
 import           Data.Monoid
 import           Control.Applicative
 import           Control.Monad
+import           Control.Monad.IO.Class
 
 type Writer w = WriterT w Identity
 
@@ -36,6 +37,9 @@ instance (Monoid w, Monad m) => Monad (WriterT w m) where
 
 instance Monoid w => Trans (WriterT w) where
     lift ma = WriterT $ fmap (\a -> (mempty, a)) ma
+
+instance (Monoid w, MonadIO m) => MonadIO (WriterT w m) where
+    liftIO = lift . liftIO
 
 -- * Writer Ops
 tell :: Monad m => w -> WriterT w m () 

@@ -5,6 +5,7 @@ import           Trans
 import           Data.Functor
 import           Control.Applicative
 import           Control.Monad
+import           Control.Monad.IO.Class
 
 type Except e = ExceptT e Identity
 
@@ -50,6 +51,9 @@ instance Monad m => Monad (ExceptT e m) where
 
 instance Trans (ExceptT e) where
     lift m = ExceptT $ fmap Right m
+
+instance MonadIO m => MonadIO (ExceptT e m) where
+    liftIO = lift . liftIO
 
 -- * Exception ops
 
