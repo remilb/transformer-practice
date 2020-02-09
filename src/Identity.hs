@@ -16,4 +16,4 @@ instance Applicative Identity where
 
 instance Monad Identity where
     return = pure
-    (Identity a) >>= f = f a 
+    (Identity a) >>= f = f a

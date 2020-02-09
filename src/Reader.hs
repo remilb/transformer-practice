@@ -11,17 +11,17 @@ type Reader r = ReaderT r Identity
 
 newtype ReaderT r m a = ReaderT {runReaderT :: r -> (m a)}
 
-reader :: Monad m => (r -> a) -> ReaderT r m a 
+reader :: Monad m => (r -> a) -> ReaderT r m a
 reader f = ReaderT $ (\r -> return (f r))
 
 mapReaderT :: (m a -> n b) -> ReaderT r m a -> ReaderT r n b
 mapReaderT f rma = ReaderT $ (\r -> f $ runReaderT rma r)
 
 withReaderT :: (r' -> r) -> ReaderT r m a -> ReaderT r' m a
-withReaderT f rma = ReaderT $ runReaderT rma . f 
+withReaderT f rma = ReaderT $ runReaderT rma . f
 
 instance Functor m => Functor (ReaderT r m) where
-    fmap f ra = ReaderT (\r ->  fmap f $ runReaderT ra r)
+    fmap f ra = ReaderT (\r -> fmap f $ runReaderT ra r)
 
 instance Applicative m => Applicative (ReaderT r m) where
     pure a = ReaderT (\r -> pure a)
@@ -40,11 +40,11 @@ instance MonadIO m => MonadIO (ReaderT r m) where
     liftIO = lift . liftIO
 
 -- * Reader Ops
-ask :: Monad m => ReaderT r m r 
+ask :: Monad m => ReaderT r m r
 ask = ReaderT (\r -> return r)
 
 local :: (r -> r) -> ReaderT r m a -> ReaderT r m a
 local f (ReaderT rf) = ReaderT $ rf . f
 
 asks :: Monad m => (r -> a) -> ReaderT r m a
-asks f = fmap f ask 
+asks f = fmap f ask

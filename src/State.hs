@@ -1,7 +1,7 @@
 module State where
 
 import           Identity
-import Trans
+import           Trans
 import           Data.Functor
 import           Control.Applicative
 import           Control.Monad
@@ -27,14 +27,15 @@ withStateT :: (s -> s) -> StateT s m a -> StateT s m a
 withStateT f (StateT sf) = StateT $ sf . f
 
 instance Functor m => Functor (StateT s m) where
-    fmap f sa = StateT (\s' -> let mb = runStateT sa s' in fmap (\(a, s) -> (f a, s)) mb)
+    fmap f sa = StateT
+        (\s' -> let mb = runStateT sa s' in fmap (\(a, s) -> (f a, s)) mb)
 
 instance Monad m => Applicative (StateT s m) where
     pure a = StateT (\s -> pure (a, s))
     sf <*> sa = StateT $ \s1 -> do
-                    (f, s2) <- runStateT sf s1
-                    (a, s3) <- runStateT sa s2
-                    return (f a, s3)
+        (f, s2) <- runStateT sf s1
+        (a, s3) <- runStateT sa s2
+        return (f a, s3)
 
 instance Monad m => Monad (StateT s m) where
     return = pure
