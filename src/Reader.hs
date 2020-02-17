@@ -2,6 +2,7 @@ module Reader where
 
 import           Identity
 import           Trans
+import           LiftSigs
 import           Data.Functor
 import           Control.Applicative
 import           Control.Monad
@@ -49,3 +50,7 @@ local f (ReaderT rf) = ReaderT $ rf . f
 asks :: Monad m => (r -> a) -> ReaderT r m a
 asks f = fmap f ask
 
+-- * Special Lifts
+liftCatch :: Catch e m a -> Catch e (ReaderT r m) a
+liftCatch catch m handler =
+    ReaderT $ \r -> catch (runReaderT m r) (\e -> runReaderT (handler e) r)

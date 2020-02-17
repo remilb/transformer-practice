@@ -2,6 +2,7 @@ module State where
 
 import           Identity
 import           Trans
+import           LiftSigs
 import           Data.Functor
 import           Control.Applicative
 import           Control.Monad
@@ -64,3 +65,9 @@ modify' f = StateT $ \s -> return ((), f $! s)
 
 gets :: Monad m => (s -> a) -> StateT s m a
 gets f = StateT $ \s -> return (f s, s)
+
+
+-- * Special Lifts
+liftCatch :: Catch e m (a, s) -> Catch e (StateT s m) a
+liftCatch catch m handler =
+    StateT $ \s -> catch (runStateT m s) (\e -> runStateT (handler e) s)

@@ -2,6 +2,7 @@ module Writer where
 
 import           Identity
 import           Trans
+import           LiftSigs
 import           Data.Functor
 import           Data.Monoid
 import           Control.Applicative
@@ -62,3 +63,9 @@ censor :: Monad m => (w -> w) -> WriterT w m a -> WriterT w m a
 censor f wa = WriterT $ do
     (w, a) <- runWriterT wa
     return (f w, a)
+
+
+-- * Special Lifts
+liftCatch :: Catch e m (w, a) -> Catch e (WriterT w m) a
+liftCatch catch m handler =
+    WriterT $ catch (runWriterT m) (\e -> runWriterT (handler e))
