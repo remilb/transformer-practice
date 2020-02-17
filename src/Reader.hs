@@ -48,3 +48,4 @@ local f (ReaderT rf) = ReaderT $ rf . f
 
 asks :: Monad m => (r -> a) -> ReaderT r m a
 asks f = fmap f ask
+
