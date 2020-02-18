@@ -1,29 +1,37 @@
+{-# LANGUAGE TypeFamilies #-}
 module Main where
 
 import           System.IO
 import           Control.Monad.IO.Class
-import           State
-import           Writer
-import           Except
-import           Reader
+import           State                          ( StateT(..) )
+import           State.Class
+import           Writer                         ( WriterT(..) )
+import           Writer.Class
+import           Except                         ( ExceptT(..) )
+import           Except.Class
+import           Reader                         ( ReaderT(..) )
+import           Reader.Class
 import           Trans
 
 type StringReaderWriter a = ReaderT String (WriterT String IO) a
 
 runStringReaderWriter srw r = runWriterT $ runReaderT srw r
 
-askName :: StringReaderWriter String
+askName :: (MonadWriter m, MonadIO m, W m ~ String) => (m String)
 askName = do
     liftIO $ putStrLn "What is your name?"
     name <- liftIO $ getLine
-    lift $ tell $ "Acquired name: " ++ name ++ "\n"
+    tell $ "Acquired name: " ++ name ++ "\n"
     return name
 
-tellMeWhatsOutside :: String -> StringReaderWriter String
+tellMeWhatsOutside
+    :: (MonadReader r m, MonadWriter m, r ~ String, W m ~ String)
+    => String
+    -> m String
 tellMeWhatsOutside name = do
     env <- ask
-    lift $ tell "Contemplating answer: Should we lie?\n"
-    lift $ tell "Decision acquired: No foma is truly harmless\n"
+    tell "Contemplating answer: Should we lie?\n"
+    tell "Decision acquired: No foma is truly harmless\n"
     return $ "Well " ++ name ++ ", " ++ env
 
 
