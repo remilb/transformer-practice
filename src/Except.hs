@@ -2,6 +2,7 @@ module Except where
 
 import           Identity
 import           Trans
+import           LiftSigs
 import           Data.Functor
 import           Control.Applicative
 import           Control.Monad
@@ -68,3 +69,16 @@ catchError m handler = ExceptT $ do
     case a of
         Right a' -> return $ Right a'
         Left  e  -> runExceptT $ handler e
+
+-- * Special Lifts
+liftListen :: (Monad m) => Listen w m (Either e a) -> Listen w (ExceptT e m) a
+liftListen listen = mapExceptT $ \m -> do
+    (w, a) <- listen m
+    return $ fmap (\r -> (w, r)) a
+
+liftPass :: (Monad m) => Pass w m (Either e a) -> Pass w (ExceptT e m) a
+liftPass pass = mapExceptT $ \m -> pass $ do
+    a <- m
+    return $ case a of
+        Left  l      -> (id, Left l)
+        Right (f, r) -> (f, Right r)

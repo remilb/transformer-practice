@@ -71,3 +71,13 @@ gets f = StateT $ \s -> return (f s, s)
 liftCatch :: Catch e m (a, s) -> Catch e (StateT s m) a
 liftCatch catch m handler =
     StateT $ \s -> catch (runStateT m s) (\e -> runStateT (handler e) s)
+
+liftListen :: Monad m => Listen w m (a, s) -> Listen w (StateT s m) a
+liftListen listen m = StateT $ \s -> do
+    (w, (a, s')) <- listen (runStateT m s)
+    return ((w, a), s')
+
+liftPass :: Monad m => Pass w m (a, s) -> Pass w (StateT s m) a
+liftPass pass m = StateT $ \s -> pass $ do
+    ((f, a), s') <- runStateT m s
+    return (f, (a, s'))
